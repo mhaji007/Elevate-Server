@@ -1,11 +1,23 @@
 import express from "express";
 const morgan = require("morgan");
 import cors from "cors";
-import fs from "fs";
+import {readdirSync} from "fs";
+import mongoose from "mongoose";
 require("dotenv").config();
 
 // Initialize app
 const app = express();
+
+// Connect to Database
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useFindAndModify: false,
+    useCreateIndex: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("Successfully connected to the Database"))
+  .catch((err) => console.log("Database connection error", err));
 
 // Wildcard cors - anyone domain has access
 // to the application
@@ -21,7 +33,7 @@ app.use(morgan("dev"));
 
 // Auto load route middlewares
 // Import and apply routes
-fs.readdirSync("./routes").map((route) =>
+readdirSync("./routes").map((route) =>
   app.use("/api", require(`./routes/${route}`))
 );
 
