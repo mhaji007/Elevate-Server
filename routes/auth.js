@@ -4,7 +4,7 @@ const router = express.Router();
 // Import validators
 
 // Import controllers
-import {register} from "../controllers/auth"
+import { register } from "../controllers/auth";
 
 router.post("/register", register)
 
