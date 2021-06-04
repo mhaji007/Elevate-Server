@@ -45,7 +45,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     // Check if user exists in database
-    const User = await User.findOne({ email }).exec();
+    const user = await User.findOne({ email }).exec();
     if (!user) res.status(404).send("No user found");
 
     // Compare passwords
@@ -73,3 +73,14 @@ export const login = async (req, res) => {
     return res.status(400).send("Error. Try again.");
   }
 };
+
+
+export const logout = async (req, res) => {
+  try {
+    res.clearCookie("token");
+    return res.json({message:"Signout success"})
+  }
+  catch(err) {
+    console.log(err)
+  }
+}
