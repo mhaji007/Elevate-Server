@@ -3,7 +3,11 @@ const morgan = require("morgan");
 import cors from "cors";
 import {readdirSync} from "fs";
 import mongoose from "mongoose";
+import csrf from "csurf"
+import cookieParser from "cookie-parser"
 require("dotenv").config();
+
+const csrfProtection = csrf({cookie:true})
 
 // Initialize app
 const app = express();
@@ -23,6 +27,7 @@ mongoose
 // to the application
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 // Global middlewares (to be used on all routes)
 app.use(morgan("dev"));
@@ -34,8 +39,17 @@ app.use(morgan("dev"));
 // Auto load route middlewares
 // Import and apply routes
 readdirSync("./routes").map((route) =>
-  app.use("/api", require(`./routes/${route}`))
+app.use("/api", require(`./routes/${route}`))
 );
+
+// Protect from CSRF
+app.use(csrfProtection);
+
+
+app.get("/api/csrf-token", (req, res) =>{
+  // Send back csrf token
+  res.json({csrfToken: req.csrfToken()})
+})
 
 const port = process.env.PORT || 8000;
 
