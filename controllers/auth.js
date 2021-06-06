@@ -84,3 +84,16 @@ export const logout = async (req, res) => {
     console.log(err)
   }
 }
+
+
+export const currentUser = async (req, res) => {
+  try {
+    // user id is made available on req.user by requireSignin middleware
+    const user = await User.findById(req.user._id).select("-password").exec()
+    console.log("Current user", user)
+    return res.json(user)
+  }
+  catch(err) {
+    console.log(err)
+  }
+}
