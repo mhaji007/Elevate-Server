@@ -90,8 +90,9 @@ export const currentUser = async (req, res) => {
   try {
     // user id is made available on req.user by requireSignin middleware
     const user = await User.findById(req.user._id).select("-password").exec()
-    console.log("Current user", user)
-    return res.json(user)
+    // console.log("Current user", user)
+    // return res.json(user)
+    return res.json({ok:true})
   }
   catch(err) {
     console.log(err)
