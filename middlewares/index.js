@@ -1,4 +1,4 @@
-/*
+ /*
 Protected route
 A protected page that restrict only to logged in user
 with valid token. In order to verify if token is valid, we
