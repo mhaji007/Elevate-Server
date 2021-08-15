@@ -14,6 +14,7 @@ import {
   currentUser,
   sendEmail,
   forgotPassword,
+  resetPassword
 } from "../controllers/auth";
 
 router.post("/register", register);
@@ -22,5 +23,6 @@ router.get("/logout", logout);
 router.get("/current-user", requireSignin, currentUser);
 router.get("/send-email", sendEmail);
 router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 module.exports = router;

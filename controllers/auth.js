@@ -62,6 +62,7 @@ export const login = async (req, res) => {
 
     // Compare passwords
     const match = await comparePassword(password, user.password);
+    if(!match) res.status(404).send("Wrong password")
 
     // Create signed token
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
@@ -201,5 +202,39 @@ export const forgotPassword = async (req, res) => {
       });
   } catch (err) {
     console.log(err);
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    // console.table({ email, code, newPassword });
+    const hashedPassword = await hashPassword(newPassword);
+
+    const user = User.findOneAndUpdate(
+      {
+        email,
+        passwordResetCode: code,
+      },
+      {
+        password: hashedPassword,
+        passwordResetCode: "",
+      }
+    ).exec();
+    /*
+    const registeredUser = await User.findOne({ email }).exec();
+    if (registeredUser.passwordResetCode.toString() === code) {
+      const user = await User.findOneAndUpdate(
+        { passwordResetCode: code },
+        { password: hashedPassword, passwordResetCode: "" }
+      ).exec();
+    } else {
+      return response.status(400).send("Code does not match.");
+    }
+    */
+    res.json({ ok: true });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).send("Error! Try again.");
   }
 };
