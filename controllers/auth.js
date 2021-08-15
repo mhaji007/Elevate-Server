@@ -2,6 +2,7 @@ import User from "../models/user";
 import { hashPassword, comparePassword } from "../utils/auth";
 import jwt from "jsonwebtoken";
 import AWS from "aws-sdk";
+import { nanoid } from "nanoid";
 
 // AWS config for passing access key and secret, etc.
 const awsConfig = {
@@ -148,4 +149,57 @@ export const sendEmail = async (req, res) => {
     .catch((err) => {
       console.log(err);
     });
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const shortCode = nanoid(6).toUpperCase();
+    const user = await User.findOneAndUpdate(
+      { email },
+      { passwordResetCode: shortCode }
+    );
+    if (!user) return res.status(400).send("User not found");
+
+    // Email params
+    const params = {
+      Source: process.env.EMAIL_FROM,
+      Destination: {
+        ToAddresses: [email],
+      },
+      Message: {
+        Body: {
+          Html: {
+            Charset: "UTF-8",
+            Data: `
+                <html>
+                  <h1>Reset Your password</h1>
+                  <p>We just received a request for a new password from your account.</p>
+                  <p>To reset your password, just enter the code below</p>
+                  <h2 style="color:black; background-color:yellow; width: intrinsic; width:-moz-max-content; width:-webkit-max-content;width: max-content;">${shortCode}</h2>
+                  <p>If you did NOT request a new password, ignore this email and your password will remain unchanged.</p>
+                  <i>Elevate.com</i>
+                </html>
+              `,
+          },
+        },
+        Subject: {
+          Charset: "UTF-8",
+          Data: "Update Your Password",
+        },
+      },
+    };
+
+    const emailSent = SES.sendEmail(params).promise();
+    emailSent
+      .then((data) => {
+        console.log(data);
+        res.json({ ok: true });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } catch (err) {
+    console.log(err);
+  }
 };
